@@ -33,22 +33,31 @@ install_deps() {
     case $pm in
         apt)
             sudo apt update
-            sudo apt install -y alsa-utils xclip xdotool libnotify-bin
+            sudo apt install -y alsa-utils wl-clipboard wtype xclip xdotool libnotify-bin
             ;;
         dnf)
-            sudo dnf install -y alsa-utils xclip xdotool libnotify
+            sudo dnf install -y alsa-utils wl-clipboard wtype xclip xdotool libnotify
             ;;
         pacman)
-            sudo pacman -S --noconfirm alsa-utils xclip xdotool libnotify
+            sudo pacman -S --noconfirm alsa-utils wl-clipboard wtype xclip xdotool libnotify
             ;;
         zypper)
-            sudo zypper install -y alsa-utils xclip xdotool libnotify-tools
+            sudo zypper install -y alsa-utils wl-clipboard wtype xclip xdotool libnotify-tools
             ;;
         *)
             echo "Unknown package manager. Please install manually:"
-            echo "  alsa-utils xclip xdotool libnotify"
+            echo "  alsa-utils wl-clipboard wtype xclip xdotool libnotify"
             ;;
     esac
+
+    echo ""
+    echo "Adding $USER to the 'input' group (required for keyboard hotkey detection)..."
+    if groups | grep -qw input; then
+        echo "  Already in 'input' group."
+    else
+        sudo usermod -aG input "$USER"
+        echo "  Done. You must log out and back in for this to take effect."
+    fi
 }
 
 # Install Python dependencies
@@ -89,6 +98,8 @@ install_service() {
     # Get current display settings
     local display="${DISPLAY:-:0}"
     local xauthority="${XAUTHORITY:-$HOME/.Xauthority}"
+    local wayland_display="${WAYLAND_DISPLAY:-}"
+    local xdg_runtime_dir="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
     local venv_path="$SCRIPT_DIR/.venv"
 
     # Check if venv exists
@@ -108,9 +119,11 @@ ExecStart=$venv_path/bin/python $SCRIPT_DIR/dictate.py
 Restart=on-failure
 RestartSec=5
 
-# X11 display access
+# Display server access (set whichever applies)
 Environment=DISPLAY=$display
 Environment=XAUTHORITY=$xauthority
+Environment=WAYLAND_DISPLAY=$wayland_display
+Environment=XDG_RUNTIME_DIR=$xdg_runtime_dir
 
 [Install]
 WantedBy=default.target

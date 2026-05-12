@@ -23,7 +23,7 @@ package-mode = false
 [tool.poetry.dependencies]
 python = "^3.10"
 faster-whisper = "^1.0.0"
-pynput = "^1.7.6"
+evdev = "^1.6.0"
 
 [build-system]
 requires = ["poetry-core"]
