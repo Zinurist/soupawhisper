@@ -107,6 +107,8 @@ def load_config():
         "model": config.get("whisper", "model", fallback=defaults["model"]),
         "device": config.get("whisper", "device", fallback=defaults["device"]),
         "compute_type": config.get("whisper", "compute_type", fallback=defaults["compute_type"]),
+        "initial_prompt": config.get("whisper", "initial_prompt", fallback=None),
+        "hotwords": config.get("whisper", "hotwords", fallback=None),
         "key": config.get("hotkey", "key", fallback=defaults["key"]),
         "auto_type": config.getboolean("behavior", "auto_type", fallback=True),
         "copy_to_clipboard": config.getboolean("behavior", "copy_to_clipboard", fallback=False),
@@ -178,6 +180,8 @@ def find_keyboards():
 MODEL_SIZE = CONFIG["model"]
 DEVICE = CONFIG["device"]
 COMPUTE_TYPE = CONFIG["compute_type"]
+INITIAL_PROMPT = CONFIG["initial_prompt"]
+HOTWORDS = CONFIG["hotwords"]
 AUTO_TYPE = CONFIG["auto_type"]
 COPY_TO_CLIPBOARD = CONFIG["copy_to_clipboard"]
 NOTIFICATIONS = CONFIG["notifications"]
@@ -295,6 +299,8 @@ class Dictation:
                 self.temp_file.name,
                 beam_size=5,
                 vad_filter=True,
+                initial_prompt=INITIAL_PROMPT,
+                hotwords=HOTWORDS,
             )
 
             text = " ".join(segment.text.strip() for segment in segments)
